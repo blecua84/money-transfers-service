@@ -1,7 +1,9 @@
 package com.blecua84.moneytransfers;
 
 import com.blecua84.moneytransfers.server.JettyServer;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class AppMainRunner {
 
     private static JettyServer serverInstance;
@@ -11,10 +13,9 @@ public class AppMainRunner {
     }
 
     public static void main(String[] args) throws Exception {
+        log.info("Start main");
         serverInstance = JettyServer.getInstance();
         serverInstance.start(8080);
-
-
-        System.out.println("Listening connections...");
+        log.debug("Listening connections...");
     }
 }

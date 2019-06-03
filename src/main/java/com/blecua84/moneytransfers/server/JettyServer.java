@@ -7,12 +7,14 @@ import com.blecua84.moneytransfers.core.impl.DefaultServletUtils;
 import com.blecua84.moneytransfers.router.TransfersServlet;
 import com.blecua84.moneytransfers.services.TransfersService;
 import com.blecua84.moneytransfers.services.impl.DefaultTransfersService;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+@Slf4j
 public class JettyServer {
 
     private static JettyServer instance;
@@ -30,6 +32,7 @@ public class JettyServer {
     }
 
     public void start(int port) throws Exception {
+        log.info("Init start in port: " + port);
         this.server = new Server();
         ServerConnector connector = new ServerConnector(this.server);
         connector.setPort(port);
@@ -51,16 +54,20 @@ public class JettyServer {
         servlet.setServletUtils(servletUtils);
         ServletHolder transfersServletHolder = new ServletHolder(servlet);
         servletHandler.addServletWithMapping(transfersServletHolder, "/transfers");
+
         server.start();
+
+        log.info("Server initialised in port: " + port);
     }
 
     public void stop() {
+        log.info("Init stop");
         try {
             this.server.stop();
-            System.out.println("The server was shutdown properly.");
+            log.info("The server was shutdown properly.");
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("The system could not stop server.");
+            log.error("The system could not stop server.", e);
         }
+        log.info("Init stop");
     }
 }
