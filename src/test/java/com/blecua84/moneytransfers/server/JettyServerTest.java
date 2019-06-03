@@ -61,4 +61,23 @@ class JettyServerTest {
         }
     }
 
+    @Test
+    void stop_shouldCloseConnection() throws Exception {
+        JettyServer server = JettyServer.getInstance();
+        server.stop();
+
+        String url = "http://localhost:8090";
+        var httpRequest = HttpRequest.newBuilder(new URI(url))
+                .timeout(Duration.ofMinutes(1))
+                .header("Content-Type", "application/json")
+                .build();
+
+        try {
+            httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            fail();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
