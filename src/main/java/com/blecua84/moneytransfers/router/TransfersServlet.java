@@ -18,8 +18,10 @@ import java.util.concurrent.ExecutionException;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
-@WebServlet(name = "transfersServlet", urlPatterns = "/transfers", asyncSupported = true)
+@WebServlet(name = "transfersServlet", urlPatterns = TransfersServlet.URL_PATTERN, asyncSupported = true)
 public class TransfersServlet extends HttpServlet {
+
+    public static final String URL_PATTERN = "/transfers";
 
     private static TransfersServlet instance;
 

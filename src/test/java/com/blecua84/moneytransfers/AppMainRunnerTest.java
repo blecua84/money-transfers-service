@@ -32,7 +32,7 @@ class AppMainRunnerTest {
 
     @AfterEach
     void tearDown() {
-        AppMainRunner.getServerInstance().stop();
+        AppMainRunner.getJettyServerInstance().stop();
     }
 
     @Test

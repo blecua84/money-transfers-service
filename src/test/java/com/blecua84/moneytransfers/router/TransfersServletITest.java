@@ -38,7 +38,7 @@ class TransfersServletITest {
     void tearDown() {
         this.httpClient = null;
 
-        AppMainRunner.getServerInstance().stop();
+        AppMainRunner.getJettyServerInstance().stop();
     }
 
     @Test

@@ -1,12 +1,6 @@
 package com.blecua84.moneytransfers.server;
 
-import com.blecua84.moneytransfers.converters.impl.AccountDTOToModelConverter;
-import com.blecua84.moneytransfers.converters.impl.TransfersDTOToModelConverter;
-import com.blecua84.moneytransfers.core.ServletUtils;
-import com.blecua84.moneytransfers.core.impl.DefaultServletUtils;
 import com.blecua84.moneytransfers.router.TransfersServlet;
-import com.blecua84.moneytransfers.services.TransfersService;
-import com.blecua84.moneytransfers.services.impl.DefaultTransfersService;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -18,10 +12,11 @@ import org.eclipse.jetty.servlet.ServletHolder;
 public class JettyServer {
 
     private static JettyServer instance;
+
     private Server server;
+    private TransfersServlet servlet;
 
     private JettyServer() {
-        this.server = new Server();
     }
 
     public static JettyServer getInstance() {
@@ -29,6 +24,10 @@ public class JettyServer {
             instance = new JettyServer();
         }
         return instance;
+    }
+
+    public void setServlet(TransfersServlet servlet) {
+        this.servlet = servlet;
     }
 
     public void start(int port) throws Exception {
@@ -41,19 +40,8 @@ public class JettyServer {
         ServletHandler servletHandler = new ServletHandler();
         server.setHandler(servletHandler);
 
-        TransfersService transfersService = new DefaultTransfersService();
-
-        TransfersDTOToModelConverter converter = TransfersDTOToModelConverter.getInstance();
-        converter.setAccountDTOToModelConverter(AccountDTOToModelConverter.getInstance());
-
-        ServletUtils servletUtils = DefaultServletUtils.getInstance();
-
-        TransfersServlet servlet = TransfersServlet.getInstance();
-        servlet.setTransfersService(transfersService);
-        servlet.setTransfersDTOToModelConverter(converter);
-        servlet.setServletUtils(servletUtils);
         ServletHolder transfersServletHolder = new ServletHolder(servlet);
-        servletHandler.addServletWithMapping(transfersServletHolder, "/transfers");
+        servletHandler.addServletWithMapping(transfersServletHolder, TransfersServlet.URL_PATTERN);
 
         server.start();
 

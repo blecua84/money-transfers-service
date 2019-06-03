@@ -1,5 +1,6 @@
 package com.blecua84.moneytransfers.server;
 
+import com.blecua84.moneytransfers.router.TransfersServlet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class JettyServerTest {
 
@@ -44,6 +46,7 @@ class JettyServerTest {
     @Test
     void start_whenItReceivesAPort_shouldStartTheServerInThatPort() throws Exception {
         JettyServer server = JettyServer.getInstance();
+        server.setServlet(mock(TransfersServlet.class));
         server.start(8090);
 
         String url = "http://localhost:8090";
@@ -52,7 +55,7 @@ class JettyServerTest {
                 .header("Content-Type", "application/json")
                 .build();
 
-        HttpResponse<String> httpResponse = null;
+        HttpResponse<String> httpResponse;
         try {
             httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             assertEquals(INITIAL_HTTP_STATUS, httpResponse.statusCode());
