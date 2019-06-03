@@ -1,0 +1,11 @@
+{
+  "from": {
+    "sortCode": "010203",
+    "accountNumber": "10305070"
+  },
+  "to": {
+    "sortCode": "010203",
+    "accountNumber": "12345678"
+  },
+  "amount": "1,0.50"
+}

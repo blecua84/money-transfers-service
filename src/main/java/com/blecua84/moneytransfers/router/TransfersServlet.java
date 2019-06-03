@@ -11,13 +11,18 @@ import com.blecua84.moneytransfers.services.exceptions.TransfersException;
 import com.blecua84.moneytransfers.services.models.Transfer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -28,9 +33,10 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 public class TransfersServlet extends HttpServlet {
 
     public static final String URL_PATTERN = "/transfers";
-    public static final String TRANSFER_CREATED_OK_MESSAGE = "Operation successfully executed";
+    private static final String TRANSFER_CREATED_OK_MESSAGE = "Operation successfully executed";
 
     private static TransfersServlet instance;
+    private static Validator validator;
 
     private TransfersService transfersService;
     private TransfersDTOToModelConverter transfersDTOToModelConverter;
@@ -39,6 +45,7 @@ public class TransfersServlet extends HttpServlet {
 
     private TransfersServlet() {
         this.objectMapper = new ObjectMapper();
+        validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
     public static TransfersServlet getInstance() {
@@ -79,28 +86,47 @@ public class TransfersServlet extends HttpServlet {
 
     private ResultDTO createTransferFromRequest(HttpServletRequest req) {
         log.info("Preparing data to call the service");
-        Integer status = HttpServletResponse.SC_OK;
-        String message = TransfersServlet.TRANSFER_CREATED_OK_MESSAGE;
+        ResultDTO resultDTO;
 
         try {
             TransferDTO dataFromBody = this.servletUtils.readBody(req, TransferDTO.class);
             log.debug("TransferDTO: " + dataFromBody.toString());
 
-            Transfer transfer = this.transfersDTOToModelConverter.convert(dataFromBody);
-            log.debug("Transfer: " + transfer.toString());
+            Set<ConstraintViolation<TransferDTO>> constraintViolationSet = validator.validate(dataFromBody);
 
-            log.debug("Executing service...");
-            transfersService.create(transfer);
-            log.debug("Service successfully executed!");
+            if (thereIsAnyValidationError(constraintViolationSet)) {
+                Transfer transfer = this.transfersDTOToModelConverter.convert(dataFromBody);
+                log.debug("Transfer: " + transfer.toString());
+
+                log.debug("Executing service...");
+                transfersService.create(transfer);
+                log.debug("Service successfully executed!");
+
+                resultDTO = createResultDTO(HttpServletResponse.SC_OK, TransfersServlet.TRANSFER_CREATED_OK_MESSAGE);
+            } else {
+                resultDTO = createResultDTO(HttpServletResponse.SC_BAD_REQUEST,
+                        extractFirstErrorMessageFromViolationSet(constraintViolationSet));
+                log.error("There was a validation error: " + resultDTO.getMessage());
+            }
         } catch (ServletUtilsException | ConverterException | TransfersException e) {
             log.error("There was an error", e);
-            status = HttpServletResponse.SC_BAD_REQUEST;
-            message = e.getMessage();
+            resultDTO = createResultDTO(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
 
-        log.info("Operation status: " + status);
-        log.info("Operation message: " + message);
+        log.debug("Operation result: " + resultDTO);
+        return resultDTO;
+    }
+
+    private String extractFirstErrorMessageFromViolationSet(Set<ConstraintViolation<TransferDTO>> constraintViolationSet) {
+        return ((ConstraintViolationImpl) constraintViolationSet.toArray()[0]).getMessage();
+    }
+
+    private ResultDTO createResultDTO(int status, String message) {
         return new ResultDTO(status, message);
+    }
+
+    private boolean thereIsAnyValidationError(Set<ConstraintViolation<TransferDTO>> constraintViolationSet) {
+        return constraintViolationSet.size() == 0;
     }
 
     private void writeResultInResponse(ResultDTO resultDTO, HttpServletResponse response) throws IOException {

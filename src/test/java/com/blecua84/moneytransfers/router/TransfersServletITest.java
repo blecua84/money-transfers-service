@@ -1,7 +1,9 @@
 package com.blecua84.moneytransfers.router;
 
 import com.blecua84.moneytransfers.AppMainRunner;
+import com.blecua84.moneytransfers.router.models.AccountDTO;
 import com.blecua84.moneytransfers.router.models.ResultDTO;
+import com.blecua84.moneytransfers.router.models.TransferDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,47 +48,163 @@ class TransfersServletITest {
     }
 
     @Test
-    void transfersEndpoint_whenItIsInvokedWithBody_shouldCallToTheService() throws URISyntaxException, InterruptedException, FileNotFoundException {
-        String url = "http://localhost:8080/transfers";
-        var httpRequest = HttpRequest.newBuilder(new URI(url))
-                .method("POST", HttpRequest.BodyPublishers.ofFile(Paths.get("src/test/resources/test-files/transfers-input-01.json")))
-                .timeout(Duration.ofMinutes(1))
-                .header("Content-Type", "application/json")
-                .build();
+    void transfersEndpoint_whenItIsInvokedWithBody_shouldCallToTheService()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-01.json");
 
+        executeTest(httpRequest, 200, "Operation successfully executed");
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithoutBody_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-02.json");
+
+        executeTest(httpRequest, 400,
+                "There was an error trying to extract the body from the request.");
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithAmountNotValid_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-03.json");
+
+        executeTest(httpRequest, 400, TransferDTO.AMOUNT_ERROR_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithAmountNull_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-05.json");
+
+        executeTest(httpRequest, 400, TransferDTO.AMOUNT_ERROR_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithAmountEmpty_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-06.json");
+
+        executeTest(httpRequest, 400, TransferDTO.AMOUNT_ERROR_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithFromAccountNull_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-04.json");
+
+        executeTest(httpRequest, 400, TransferDTO.FROM_ERROR_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithFromAccountSortCodeNotValid_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-07.json");
+
+        executeTest(httpRequest, 400, AccountDTO.SORT_CODE_NOT_VALID_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithFromAccountSortCodeNull_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-08.json");
+
+        executeTest(httpRequest, 400, AccountDTO.SORT_CODE_NOT_VALID_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithFromAccountAccountNumberNotValid_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-09.json");
+
+        executeTest(httpRequest, 400, AccountDTO.ACCOUNT_NUMBER_NOT_VALID_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithFromAccountAccountNumberNull_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-10.json");
+
+        executeTest(httpRequest, 400, AccountDTO.ACCOUNT_NUMBER_NOT_VALID_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithToAccountNull_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-11.json");
+
+        executeTest(httpRequest, 400, TransferDTO.TO_ERROR_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithToAccountSortCodeNotValid_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-12.json");
+
+        executeTest(httpRequest, 400, AccountDTO.SORT_CODE_NOT_VALID_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithToAccountAccountNumberNotValid_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-13.json");
+
+        executeTest(httpRequest, 400, AccountDTO.ACCOUNT_NUMBER_NOT_VALID_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithToAccountAccountNumberNull_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-14.json");
+
+        executeTest(httpRequest, 400, AccountDTO.ACCOUNT_NUMBER_NOT_VALID_MSG);
+    }
+
+    @Test
+    void transfersEndpoint_whenItIsInvokedWithToAccountSortCodeNull_shouldReturnWithABadRequest()
+            throws URISyntaxException, InterruptedException, FileNotFoundException {
+        HttpRequest httpRequest = createHttpRequestPostWithBody(
+                "src/test/resources/test-files/transfers-input-15.json");
+
+        executeTest(httpRequest, 400, AccountDTO.SORT_CODE_NOT_VALID_MSG);
+    }
+
+    private void executeTest(HttpRequest httpRequest, int expectedStatus, String expectedMessage)
+            throws InterruptedException {
         HttpResponse<String> httpResponse;
         try {
             httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             ResultDTO resultDTO = getOutputFromResponse(httpResponse);
 
-            assertEquals(200, httpResponse.statusCode());
+            assertEquals(expectedStatus, httpResponse.statusCode());
             assertNotNull(resultDTO);
-            assertEquals("Operation successfully executed", resultDTO.getMessage());
+            assertEquals(expectedMessage, resultDTO.getMessage());
         } catch (IOException e) {
             fail();
         }
     }
 
-    @Test
-    void transfersEndpoint_whenItIsInvokedWithoutBody_shouldReturnWithABadRequest() throws URISyntaxException, InterruptedException, FileNotFoundException {
+    private HttpRequest createHttpRequestPostWithBody(String filePath) throws URISyntaxException, FileNotFoundException {
         String url = "http://localhost:8080/transfers";
-        var httpRequest = HttpRequest.newBuilder(new URI(url))
-                .method("POST", HttpRequest.BodyPublishers.ofFile(Paths.get("src/test/resources/test-files/transfers-input-02.json")))
+        return HttpRequest.newBuilder(new URI(url))
+                .method("POST", HttpRequest.BodyPublishers.ofFile(Paths.get(filePath)))
                 .timeout(Duration.ofMinutes(1))
                 .header("Content-Type", "application/json")
                 .build();
-
-        HttpResponse<String> httpResponse;
-        try {
-            httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            ResultDTO resultDTO = getOutputFromResponse(httpResponse);
-
-            assertEquals(400, httpResponse.statusCode());
-            assertNotNull(resultDTO);
-            assertEquals("There was an error trying to extract the body from the request.", resultDTO.getMessage());
-        } catch (IOException e) {
-            fail();
-        }
     }
 
     private ResultDTO getOutputFromResponse(HttpResponse response) throws IOException {
