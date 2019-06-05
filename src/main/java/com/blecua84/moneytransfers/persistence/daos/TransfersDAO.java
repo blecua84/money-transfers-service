@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface TransfersDAO {
 
-    String GET_ALL_TRANSFERS_QUERY = "from Transfers";
+    String GET_ALL_TRANSFERS_QUERY = "from Transfer";
     String TRANSFER_CANNOT_BE_SAVED = "There was an error trying to save the transfer";
     String INPUT_TRANSFER_IS_NULL = "Input Transfer is null or empty";
     String TRANSFER_CANNOT_BE_FETCHED = "There was an error trying to get the transfers list";

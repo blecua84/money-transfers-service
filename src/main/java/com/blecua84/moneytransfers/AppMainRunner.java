@@ -14,6 +14,7 @@ import com.blecua84.moneytransfers.server.JettyServer;
 import com.blecua84.moneytransfers.services.TransfersService;
 import com.blecua84.moneytransfers.services.impl.DefaultTransfersService;
 import com.blecua84.moneytransfers.services.models.Account;
+import com.blecua84.moneytransfers.services.models.Transfer;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -62,6 +63,13 @@ public class AppMainRunner {
         try {
             accountDAOInstance.saveAccount(account1);
             accountDAOInstance.saveAccount(account2);
+
+            Transfer newTransfer = new Transfer(account1, account2, 100);
+            transfersDAOInstance.saveTransfers(newTransfer);
+
+            for (Transfer transfer : transfersDAOInstance.getTransfers()) {
+                log.info("New Transfer found: " + transfer.toString());
+            }
         } catch (DataManagerException e) {
             log.error(e.getMessage(), e);
         }
@@ -87,5 +95,6 @@ public class AppMainRunner {
         transfersDTOToModelConverterInstance.setAccountDTOToModelConverter(accountDTOToModelConverterInstance);
         accountDAOInstance.setDataManager(dataManagerInstance);
         transfersDAOInstance.setDataManager(dataManagerInstance);
+        transfersDAOInstance.setAccountDAO(accountDAOInstance);
     }
 }

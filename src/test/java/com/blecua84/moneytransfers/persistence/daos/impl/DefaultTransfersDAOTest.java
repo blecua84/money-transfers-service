@@ -65,11 +65,10 @@ class DefaultTransfersDAOTest {
 
         this.instance.saveTransfers(mock(Transfer.class));
 
-        verify(accountDAO, times(2)).saveAccount(any());
+        verify(accountDAO, times(2)).updateAccount(eq(session), any());
         verify(dataManager, times(1)).getSessionFactory();
         verify(sessionFactory).openSession();
         verify(session).beginTransaction();
-        verify(transaction).commit();
     }
 
     @Test
@@ -95,7 +94,7 @@ class DefaultTransfersDAOTest {
     }
 
     @Test
-    void saveTransfers_whenItReceivesAValidTransferButThereIsAnErrorWhenTriesToSave_shouldExecuteRollbackAndThrowAnException()
+    void saveTransfers_whenItReceivesAValidTransferButThereIsAnErrorWhenSave_shouldExecuteRollbackAndThrowAnException()
             throws DataManagerException {
         doNothing().when(this.accountDAO).saveAccount(any());
         doThrow(mock(HibernateException.class)).when(session).save(any());

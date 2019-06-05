@@ -26,9 +26,10 @@ public abstract class CommonDAO {
         throw new DataManagerException(message, exception);
     }
 
-    protected <T> void execTransactionalOperation(DataManager instance, String errorMessage, BiConsumer predicate, T data)
+    protected <T> void execTransactionalOperation(DataManager instance, String errorMessage, BiConsumer predicate,
+                                                  T data)
             throws DataManagerException {
-        log.info("Init execTransactionalOperation");
+        log.info("Init execNonTransactionalConcreteOperation");
         Transaction transaction = null;
         try (Session session = instance.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
@@ -39,14 +40,27 @@ public abstract class CommonDAO {
         } catch (HibernateException e) {
             rollbackAndThrowException(transaction, e, errorMessage);
         }
-        log.info("End execTransactionalOperation");
+        log.info("End execNonTransactionalConcreteOperation");
+    }
+
+    protected <T> void execNonExplicitTransactionalOperation(Session session, String errorMessage, BiConsumer predicate,
+                                                             T data)
+            throws DataManagerException {
+        log.info("Init execNonExplicitTransactionalOperation");
+        try {
+            predicate.accept(session, data);
+        } catch (HibernateException e) {
+            log.error(errorMessage, e);
+            throw new DataManagerException(errorMessage, e);
+        }
+        log.info("End execNonExplicitTransactionalOperation");
     }
 
     protected abstract <T> T execConcreteFunction(Session session, String... params) throws DataManagerException;
 
-    protected <T> T execNonTransactionalOperation(DataManager instance, String errorMessage, String... params)
+    protected <T> T execNonTransactionalConcreteOperation(DataManager instance, String errorMessage, String... params)
             throws DataManagerException {
-        log.info("Init execNonTransactionalOperation");
+        log.info("Init execNonTransactionalConcreteOperation");
 
         T result;
         try (Session session = instance.getSessionFactory().openSession()) {
@@ -56,7 +70,7 @@ public abstract class CommonDAO {
             throw new DataManagerException(errorMessage, e);
         }
 
-        log.info("End execNonTransactionalOperation");
+        log.info("End execNonTransactionalConcreteOperation");
         return result;
     }
 }

@@ -25,11 +25,13 @@ public class DefaultAccountDAO extends CommonDAO implements AccountDAO {
     private static DefaultAccountDAO instance;
     private static Function<DefaultAccountDAO, Boolean> isInstanceNull = instance -> ofNullable(instance).isEmpty();
     private DataManager dataManager;
-    private Function<Account, Boolean> isAccountNull = account -> ofNullable(account).isEmpty();
-    private Function<DataManager, Boolean> isDataManagerNull = manager -> ofNullable(manager).isEmpty();
-    private Function<SessionFactory, Boolean> isSessionFactoryNull = factory -> ofNullable(factory).isEmpty();
+    private Function<Object, Boolean> isObjectNull = input -> ofNullable(input).isEmpty();
+    private Function<Account, Boolean> isAccountNull = account -> isObjectNull.apply(account);
+    private Function<DataManager, Boolean> isDataManagerNull = manager -> isObjectNull.apply(manager);
+    private Function<SessionFactory, Boolean> isSessionFactoryNull = factory -> isObjectNull.apply(factory);
     private BiConsumer<Session, Account> saveAccount = Session::save;
     private BiConsumer<Session, Account> updateAccount = Session::update;
+
     private DefaultAccountDAO() {
         super();
     }
@@ -71,7 +73,7 @@ public class DefaultAccountDAO extends CommonDAO implements AccountDAO {
         query.setParameter("SC", args[0]);
         query.setParameter("AN", args[1]);
 
-        if (query.getSingleResult() == null) {
+        if (isObjectNull.apply(query.getSingleResult())) {
             log.error(ACCOUNT_DOES_NOT_EXIST);
             throw new DataManagerException(ACCOUNT_DOES_NOT_EXIST);
         }
@@ -87,7 +89,7 @@ public class DefaultAccountDAO extends CommonDAO implements AccountDAO {
         log.debug("sortCode: " + sortCode);
         log.debug("accountNumber: " + accountNumber);
 
-        Account result = execNonTransactionalOperation(
+        Account result = execNonTransactionalConcreteOperation(
                 instance.getDataManager(), ACCOUNT_CANNOT_BE_FETCHED, sortCode, accountNumber);
 
         log.info("End getAccountBySortCodeAndNumber");
@@ -95,13 +97,14 @@ public class DefaultAccountDAO extends CommonDAO implements AccountDAO {
     }
 
     @Override
-    public void updateAccount(Account account) throws DataManagerException {
+    public void updateAccount(Session session, Account account) throws DataManagerException {
         log.info("Init updateAccount");
+
         if (isAccountNull.apply(account)) {
             throw new DataManagerException(ACCOUNT_NULL_MESSAGE);
         }
 
-        execTransactionalOperation(instance.getDataManager(), ACCOUNT_CANNOT_BE_UPDATED, updateAccount, account);
+        execNonExplicitTransactionalOperation(session, ACCOUNT_CANNOT_BE_UPDATED, updateAccount, account);
 
         log.debug("Account: " + account.toString());
         log.info("End updateAccount");

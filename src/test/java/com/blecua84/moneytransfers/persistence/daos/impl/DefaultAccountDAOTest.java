@@ -182,7 +182,7 @@ class DefaultAccountDAOTest {
     @Test
     void updateAccount_whenTheInputIsNull_shouldThrownADataManagerException() {
         try {
-            instance.updateAccount(null);
+            instance.updateAccount(session, null);
         } catch (DataManagerException e) {
             assertEquals(instance.ACCOUNT_NULL_MESSAGE, e.getMessage());
         }
@@ -197,36 +197,23 @@ class DefaultAccountDAOTest {
         when(query.getSingleResult()).thenReturn(mockResult);
         when(session.beginTransaction()).thenReturn(transaction);
 
-        instance.updateAccount(new Account(1, "010101", "12345678", 100));
+        instance.updateAccount(session, new Account(1, "010101", "12345678", 100));
 
-        verify(instance.getDataManager()).getSessionFactory();
-        verify(dataManager).getSessionFactory();
-        verify(sessionFactory).openSession();
-        verify(session).beginTransaction();
         verify(session).update(any());
-        verify(transaction).commit();
     }
 
     @Test
     void updateAccount_whenTheAccountIsValidButThereIsAnErrorInTheUpdateOperation_shouldThrownADataManagerException() {
-        when(dataManager.getSessionFactory()).thenReturn(sessionFactory);
-        when(sessionFactory.openSession()).thenReturn(session);
         when(session.createQuery(anyString())).thenReturn(query);
         Object mockResult = mock(Account.class);
         when(query.getSingleResult()).thenReturn(mockResult);
 
-        when(session.beginTransaction()).thenReturn(transaction);
         doThrow(HibernateException.class).when(session).update(any());
 
         try {
-            instance.updateAccount(new Account(1, "010101", "12345678", 100));
+            instance.updateAccount(session, new Account(1, "010101", "12345678", 100));
         } catch (DataManagerException e) {
-            verify(instance.getDataManager()).getSessionFactory();
-            verify(dataManager).getSessionFactory();
-            verify(sessionFactory).openSession();
-            verify(session).beginTransaction();
             verify(session).update(any());
-            verify(transaction).rollback();
             assertEquals(instance.ACCOUNT_CANNOT_BE_UPDATED, e.getMessage());
         }
     }

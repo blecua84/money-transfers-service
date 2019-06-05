@@ -2,6 +2,7 @@ package com.blecua84.moneytransfers.persistence.daos;
 
 import com.blecua84.moneytransfers.persistence.exceptions.DataManagerException;
 import com.blecua84.moneytransfers.services.models.Account;
+import org.hibernate.Session;
 
 public interface AccountDAO {
 
@@ -16,5 +17,5 @@ public interface AccountDAO {
 
     Account getAccountBySortCodeAndNumber(String sortCode, String accountNumber) throws DataManagerException;
 
-    void updateAccount(Account account) throws DataManagerException;
+    void updateAccount(Session session, Account account) throws DataManagerException;
 }

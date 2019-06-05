@@ -25,6 +25,7 @@ public class DefaultTransfersDAO extends CommonDAO implements TransfersDAO {
     Function<Transfer, Boolean> isTransferNull = transfer -> !ofNullable(transfer).isPresent();
     private DataManager dataManager;
     private AccountDAO accountDAO;
+
     private DefaultTransfersDAO() {
     }
 
@@ -49,8 +50,8 @@ public class DefaultTransfersDAO extends CommonDAO implements TransfersDAO {
         try (Session session = instance.getDataManager().getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
 
-            accountDAO.saveAccount(transfer.getFrom());
-            accountDAO.saveAccount(transfer.getTo());
+            accountDAO.updateAccount(session, transfer.getFrom());
+            accountDAO.updateAccount(session, transfer.getTo());
             session.save(transfer);
 
             transaction.commit();
@@ -66,14 +67,16 @@ public class DefaultTransfersDAO extends CommonDAO implements TransfersDAO {
     public List<Transfer> getTransfers() throws DataManagerException {
         log.info("Init getTransfers");
 
-        List<Transfer> resultList = execNonTransactionalOperation(instance.getDataManager(), TRANSFER_CANNOT_BE_FETCHED);
+        List<Transfer> resultList = execNonTransactionalConcreteOperation(
+                instance.getDataManager(),
+                TRANSFER_CANNOT_BE_FETCHED);
 
         log.info("End saveTransfers");
         return resultList;
     }
 
     @Override
-    protected <T> T execConcreteFunction(Session session, String... params) throws DataManagerException {
+    protected <T> T execConcreteFunction(Session session, String... params) {
         return (T) session.createQuery(GET_ALL_TRANSFERS_QUERY).list();
     }
 }
