@@ -14,9 +14,9 @@ import javax.persistence.*;
 public class Transfer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id")
-    private int id;
+    private Integer id;
 
     @OneToOne
     @JoinColumn(name = "fk_from")

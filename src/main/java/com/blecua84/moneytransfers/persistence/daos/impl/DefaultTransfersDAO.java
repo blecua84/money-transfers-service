@@ -7,6 +7,7 @@ import com.blecua84.moneytransfers.persistence.daos.TransfersDAO;
 import com.blecua84.moneytransfers.persistence.exceptions.DataManagerException;
 import com.blecua84.moneytransfers.services.models.Transfer;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -17,6 +18,7 @@ import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
 public class DefaultTransfersDAO extends CommonDAO implements TransfersDAO {

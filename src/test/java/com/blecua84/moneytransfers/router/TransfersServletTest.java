@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -95,5 +96,16 @@ class TransfersServletTest {
         this.transfersServlet.doPost(mockRequest, mockResponse);
 
         verify(this.transfersService).create(eq(transferToDo));
+    }
+
+    @Test
+    void doGet_whenItReceivesAValidRequest_shouldCallToTheService() throws TransfersException {
+        when(this.transfersService.getTransfers()).thenReturn(mock(List.class));
+        HttpServletRequest mockRequest = new TestHttpServletRequest();
+        HttpServletResponse mockResponse = mock(HttpServletResponse.class);
+
+        this.transfersServlet.doGet(mockRequest, mockResponse);
+
+        verify(this.transfersService).getTransfers();
     }
 }

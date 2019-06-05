@@ -1,6 +1,7 @@
 package com.blecua84.moneytransfers.router;
 
 import com.blecua84.moneytransfers.converters.exceptions.ConverterException;
+import com.blecua84.moneytransfers.converters.impl.TransferListToTransferDTOConverter;
 import com.blecua84.moneytransfers.converters.impl.TransfersDTOToModelConverter;
 import com.blecua84.moneytransfers.core.ServletUtils;
 import com.blecua84.moneytransfers.core.exceptions.ServletUtilsException;
@@ -10,6 +11,7 @@ import com.blecua84.moneytransfers.services.TransfersService;
 import com.blecua84.moneytransfers.services.exceptions.TransfersException;
 import com.blecua84.moneytransfers.services.models.Transfer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 
@@ -22,6 +24,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -29,6 +32,7 @@ import java.util.concurrent.ExecutionException;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Slf4j
+@Data
 @WebServlet(name = "transfersServlet", urlPatterns = TransfersServlet.URL_PATTERN, asyncSupported = true)
 public class TransfersServlet extends HttpServlet {
 
@@ -40,6 +44,7 @@ public class TransfersServlet extends HttpServlet {
 
     private TransfersService transfersService;
     private TransfersDTOToModelConverter transfersDTOToModelConverter;
+    private TransferListToTransferDTOConverter transferListToTransferDTOConverter;
     private ServletUtils servletUtils;
     private ObjectMapper objectMapper;
 
@@ -55,24 +60,20 @@ public class TransfersServlet extends HttpServlet {
         return instance;
     }
 
-    public void setTransfersService(TransfersService transfersService) {
-        this.transfersService = transfersService;
-    }
-
-    public void setTransfersDTOToModelConverter(TransfersDTOToModelConverter transfersDTOToModelConverter) {
-        this.transfersDTOToModelConverter = transfersDTOToModelConverter;
-    }
-
-    public void setServletUtils(ServletUtils servletUtils) {
-        this.servletUtils = servletUtils;
-    }
-
     public void doPost(HttpServletRequest req, HttpServletResponse resp) {
         log.info("Init doPost");
         CompletableFuture<ResultDTO> future = supplyAsync(() -> createTransferFromRequest(req));
 
         executeCompletableFuture(future, resp);
         log.info("End doPost");
+    }
+
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        log.info("Init doGet");
+        CompletableFuture<ResultDTO> future = supplyAsync(this::getTransfers);
+
+        executeCompletableFuture(future, resp);
+        log.info("End doGet");
     }
 
     private void executeCompletableFuture(CompletableFuture<ResultDTO> future, HttpServletResponse resp) {
@@ -82,6 +83,26 @@ public class TransfersServlet extends HttpServlet {
             log.error(e.getMessage(), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private ResultDTO<List<TransferDTO>> getTransfers() {
+        ResultDTO<List<TransferDTO>> result;
+
+        try {
+            List<Transfer> transfers = this.transfersService.getTransfers();
+
+            result = createResultDTO(
+                    HttpServletResponse.SC_OK,
+                    TransfersServlet.TRANSFER_CREATED_OK_MESSAGE,
+                    this.transferListToTransferDTOConverter.convert(transfers));
+        } catch (TransfersException e) {
+            log.error(e.getMessage(), e);
+            result = createResultDTO(
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    e.getMessage());
+        }
+
+        return result;
     }
 
     private ResultDTO createTransferFromRequest(HttpServletRequest req) {
@@ -121,8 +142,12 @@ public class TransfersServlet extends HttpServlet {
         return ((ConstraintViolationImpl) constraintViolationSet.toArray()[0]).getMessage();
     }
 
-    private ResultDTO createResultDTO(int status, String message) {
-        return new ResultDTO(status, message);
+    private <T> ResultDTO<T> createResultDTO(int status, String message, T data) {
+        return new ResultDTO<T>(status, message, data);
+    }
+
+    private <T> ResultDTO<T> createResultDTO(int status, String message) {
+        return new ResultDTO<T>(status, message);
     }
 
     private boolean thereIsAnyValidationError(Set<ConstraintViolation<TransferDTO>> constraintViolationSet) {

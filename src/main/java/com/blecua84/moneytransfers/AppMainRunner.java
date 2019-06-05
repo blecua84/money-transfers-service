@@ -1,6 +1,8 @@
 package com.blecua84.moneytransfers;
 
 import com.blecua84.moneytransfers.converters.impl.AccountDTOToModelConverter;
+import com.blecua84.moneytransfers.converters.impl.AccountToDTOModelConverter;
+import com.blecua84.moneytransfers.converters.impl.TransferListToTransferDTOConverter;
 import com.blecua84.moneytransfers.converters.impl.TransfersDTOToModelConverter;
 import com.blecua84.moneytransfers.core.ServletUtils;
 import com.blecua84.moneytransfers.core.impl.DefaultServletUtils;
@@ -11,7 +13,7 @@ import com.blecua84.moneytransfers.persistence.exceptions.DataManagerException;
 import com.blecua84.moneytransfers.persistence.impl.DefaultDataManager;
 import com.blecua84.moneytransfers.router.TransfersServlet;
 import com.blecua84.moneytransfers.server.JettyServer;
-import com.blecua84.moneytransfers.services.TransfersService;
+import com.blecua84.moneytransfers.services.exceptions.TransfersException;
 import com.blecua84.moneytransfers.services.impl.DefaultTransfersService;
 import com.blecua84.moneytransfers.services.models.Account;
 import com.blecua84.moneytransfers.services.models.Transfer;
@@ -26,8 +28,10 @@ public class AppMainRunner {
 
     private static TransfersDTOToModelConverter transfersDTOToModelConverterInstance;
     private static AccountDTOToModelConverter accountDTOToModelConverterInstance;
+    private static TransferListToTransferDTOConverter transferListToTransferDTOConverter;
+    private static AccountToDTOModelConverter accountToDTOModelConverter;
 
-    private static TransfersService transfersServiceInstance;
+    private static DefaultTransfersService transfersServiceInstance;
     private static DataManager dataManagerInstance;
     private static DefaultAccountDAO accountDAOInstance;
     private static DefaultTransfersDAO transfersDAOInstance;
@@ -65,13 +69,15 @@ public class AppMainRunner {
             accountDAOInstance.saveAccount(account2);
 
             Transfer newTransfer = new Transfer(account1, account2, 100);
-            transfersDAOInstance.saveTransfers(newTransfer);
+            transfersServiceInstance.create(newTransfer);
 
-            for (Transfer transfer : transfersDAOInstance.getTransfers()) {
+            for (Transfer transfer : transfersServiceInstance.getTransfers()) {
                 log.info("New Transfer found: " + transfer.toString());
             }
-        } catch (DataManagerException e) {
+        } catch (TransfersException e) {
             log.error(e.getMessage(), e);
+        } catch (DataManagerException e) {
+            e.printStackTrace();
         }
     }
 
@@ -79,6 +85,8 @@ public class AppMainRunner {
         transfersServiceInstance = DefaultTransfersService.getInstance();
         transfersDTOToModelConverterInstance = TransfersDTOToModelConverter.getInstance();
         accountDTOToModelConverterInstance = AccountDTOToModelConverter.getInstance();
+        transferListToTransferDTOConverter = TransferListToTransferDTOConverter.getInstance();
+        accountToDTOModelConverter = AccountToDTOModelConverter.getInstance();
         servletUtilsInstance = DefaultServletUtils.getInstance();
         transfersServletInstance = TransfersServlet.getInstance();
         jettyServerInstance = JettyServer.getInstance();
@@ -91,10 +99,13 @@ public class AppMainRunner {
         transfersServletInstance.setTransfersService(transfersServiceInstance);
         transfersServletInstance.setTransfersDTOToModelConverter(transfersDTOToModelConverterInstance);
         transfersServletInstance.setServletUtils(servletUtilsInstance);
+        transfersServletInstance.setTransferListToTransferDTOConverter(transferListToTransferDTOConverter);
         jettyServerInstance.setServlet(transfersServletInstance);
         transfersDTOToModelConverterInstance.setAccountDTOToModelConverter(accountDTOToModelConverterInstance);
+        transferListToTransferDTOConverter.setAccountToDTOModelConverter(accountToDTOModelConverter);
         accountDAOInstance.setDataManager(dataManagerInstance);
         transfersDAOInstance.setDataManager(dataManagerInstance);
         transfersDAOInstance.setAccountDAO(accountDAOInstance);
+        transfersServiceInstance.setTransfersDAO(transfersDAOInstance);
     }
 }
