@@ -3,20 +3,23 @@ package com.blecua84.moneytransfers.core.impl;
 import com.blecua84.moneytransfers.core.ServletUtils;
 import com.blecua84.moneytransfers.core.exceptions.ServletUtilsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+@Data
+@Slf4j
 public class DefaultServletUtils implements ServletUtils {
 
     private static final String GENERIC_ERROR_MESSAGE = "There was an error trying to extract the body from the request.";
     private static DefaultServletUtils instance;
 
-    private final ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     private DefaultServletUtils() {
-        this.objectMapper = new ObjectMapper();
     }
 
     public static DefaultServletUtils getInstance() {
@@ -29,12 +32,15 @@ public class DefaultServletUtils implements ServletUtils {
 
     @Override
     public <T> T readBody(HttpServletRequest request, Class<T> targetClass) throws ServletUtilsException {
+        log.info("Init readBody for class: " + targetClass);
         try {
             String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-            return objectMapper.readValue(body, targetClass);
+            T readBody = objectMapper.readValue(body, targetClass);
+            log.info("End readBody for class: " + targetClass);
+            return readBody;
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new ServletUtilsException(GENERIC_ERROR_MESSAGE);
+            log.error(e.getMessage(), e);
+            throw new ServletUtilsException(GENERIC_ERROR_MESSAGE, e);
         }
     }
 }

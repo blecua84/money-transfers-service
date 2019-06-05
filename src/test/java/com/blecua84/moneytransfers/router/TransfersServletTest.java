@@ -11,6 +11,7 @@ import com.blecua84.moneytransfers.services.exceptions.TransfersException;
 import com.blecua84.moneytransfers.services.models.Account;
 import com.blecua84.moneytransfers.services.models.Transfer;
 import com.blecua84.moneytransfers.test.utils.TestHttpServletRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +42,7 @@ class TransfersServletTest {
         this.transfersServlet.setTransfersService(this.transfersService);
         this.transfersServlet.setTransfersDTOToModelConverter(this.transfersDTOToModelConverter);
         this.transfersServlet.setServletUtils(this.servletUtils);
+        this.transfersServlet.setObjectMapper(mock(ObjectMapper.class));
     }
 
     @Test

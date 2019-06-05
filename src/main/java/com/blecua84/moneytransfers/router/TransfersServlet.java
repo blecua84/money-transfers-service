@@ -49,7 +49,6 @@ public class TransfersServlet extends HttpServlet {
     private ObjectMapper objectMapper;
 
     private TransfersServlet() {
-        this.objectMapper = new ObjectMapper();
         validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 

@@ -10,6 +10,8 @@
         <property name="dialect">org.hibernate.dialect.H2Dialect</property>
         <property name="show_sql">true</property>
         <property name="hbm2ddl.auto">create</property>
+        <property name="minimum-connection-count">10</property>
+        <property name="maximum-connection-count">50</property>
 
         <mapping class="com.blecua84.moneytransfers.services.models.Account"/>
         <mapping class="com.blecua84.moneytransfers.services.models.Transfer"/>

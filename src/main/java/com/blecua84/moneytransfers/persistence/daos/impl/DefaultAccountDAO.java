@@ -12,6 +12,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
+import javax.persistence.NoResultException;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -73,9 +74,14 @@ public class DefaultAccountDAO extends CommonDAO implements AccountDAO {
         query.setParameter("SC", args[0]);
         query.setParameter("AN", args[1]);
 
-        if (isObjectNull.apply(query.getSingleResult())) {
-            log.error(ACCOUNT_DOES_NOT_EXIST);
-            throw new DataManagerException(ACCOUNT_DOES_NOT_EXIST);
+        try {
+            if (isObjectNull.apply(query.getSingleResult())) {
+                log.error(ACCOUNT_DOES_NOT_EXIST);
+                throw new DataManagerException(ACCOUNT_DOES_NOT_EXIST);
+            }
+        } catch (NoResultException e) {
+            log.error(ACCOUNT_DOES_NOT_EXIST, e);
+            throw new DataManagerException(ACCOUNT_DOES_NOT_EXIST, e);
         }
 
         result = (Account) query.getSingleResult();

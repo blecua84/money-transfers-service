@@ -6,7 +6,7 @@ import org.hibernate.Session;
 
 public interface AccountDAO {
 
-    String GET_ACCOUNT_BY_SORT_CODE_AND_NUMBER_QUERY = "from Account where sortCode=:SC and accountNumber=:AN";
+    String GET_ACCOUNT_BY_SORT_CODE_AND_NUMBER_QUERY = "from Account a where a.sortCode=:SC and a.accountNumber=:AN";
     String ACCOUNT_NULL_MESSAGE = "Input account is null or empty";
     String ACCOUNT_CANNOT_BE_UPDATED = "Input account cannot be updated";
     String ACCOUNT_CANNOT_BE_SAVED = "There was an error trying to save the account";

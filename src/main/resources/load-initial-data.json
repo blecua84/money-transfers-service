@@ -1,0 +1,47 @@
+[
+  {
+    "sortCode": "010203",
+    "accountNumber": "12345678",
+    "available": 5000.00
+  },
+  {
+    "sortCode": "010203",
+    "accountNumber": "12345680",
+    "available": 20000.00
+  },
+  {
+    "sortCode": "090129",
+    "accountNumber": "12340001",
+    "available": 200.00
+  },
+  {
+    "sortCode": "090129",
+    "accountNumber": "12340002",
+    "available": 587.24
+  },
+  {
+    "sortCode": "090129",
+    "accountNumber": "12340003",
+    "available": 15001.00
+  },
+  {
+    "sortCode": "090129",
+    "accountNumber": "12340004",
+    "available": 2500.00
+  },
+  {
+    "sortCode": "090129",
+    "accountNumber": "12340005",
+    "available": 1230.00
+  },
+  {
+    "sortCode": "090129",
+    "accountNumber": "12340006",
+    "available": 50.00
+  },
+  {
+    "sortCode": "090129",
+    "accountNumber": "12340007",
+    "available": 5020.00
+  }
+]

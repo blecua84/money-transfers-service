@@ -1,10 +1,10 @@
 package com.blecua84.moneytransfers.core.impl;
 
-import com.blecua84.moneytransfers.core.ServletUtils;
 import com.blecua84.moneytransfers.core.exceptions.ServletUtilsException;
 import com.blecua84.moneytransfers.router.models.AccountDTO;
 import com.blecua84.moneytransfers.router.models.TransferDTO;
 import com.blecua84.moneytransfers.test.utils.TestHttpServletRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,11 +15,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DefaultServletUtilsTest {
 
-    private ServletUtils servletUtils;
+    private DefaultServletUtils servletUtils;
 
     @BeforeEach
     void setUp() {
         this.servletUtils = DefaultServletUtils.getInstance();
+        this.servletUtils.setObjectMapper(new ObjectMapper());
     }
 
     @Test
@@ -42,9 +43,9 @@ class DefaultServletUtilsTest {
         TransferDTO result = this.servletUtils.readBody(request, TransferDTO.class);
 
         assertNotNull(result);
-        assertEquals(new AccountDTO("010203", "10305070"), result.getFrom());
-        assertEquals(new AccountDTO("010203", "12345678"), result.getTo());
-        assertEquals("10.50", result.getAmount());
+        assertEquals(new AccountDTO("010203", "12345678"), result.getFrom());
+        assertEquals(new AccountDTO("010203", "12345680"), result.getTo());
+        assertEquals("1000.50", result.getAmount());
     }
 
     @Test

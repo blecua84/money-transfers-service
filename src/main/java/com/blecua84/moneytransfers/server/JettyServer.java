@@ -34,7 +34,7 @@ public class JettyServer {
     public void start(int port) throws Exception {
         log.info("Init start in port: " + port);
 
-        int maxThreads = 100;
+        int maxThreads = 1000;
         int minThreads = 10;
         int idleTimeout = 120;
 

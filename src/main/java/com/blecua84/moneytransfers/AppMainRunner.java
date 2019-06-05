@@ -4,7 +4,6 @@ import com.blecua84.moneytransfers.converters.impl.AccountDTOToModelConverter;
 import com.blecua84.moneytransfers.converters.impl.AccountToDTOModelConverter;
 import com.blecua84.moneytransfers.converters.impl.TransferListToTransferDTOConverter;
 import com.blecua84.moneytransfers.converters.impl.TransfersDTOToModelConverter;
-import com.blecua84.moneytransfers.core.ServletUtils;
 import com.blecua84.moneytransfers.core.impl.DefaultServletUtils;
 import com.blecua84.moneytransfers.persistence.DataManager;
 import com.blecua84.moneytransfers.persistence.daos.impl.DefaultAccountDAO;
@@ -13,18 +12,20 @@ import com.blecua84.moneytransfers.persistence.exceptions.DataManagerException;
 import com.blecua84.moneytransfers.persistence.impl.DefaultDataManager;
 import com.blecua84.moneytransfers.router.TransfersServlet;
 import com.blecua84.moneytransfers.server.JettyServer;
-import com.blecua84.moneytransfers.services.exceptions.TransfersException;
 import com.blecua84.moneytransfers.services.impl.DefaultTransfersService;
 import com.blecua84.moneytransfers.services.models.Account;
-import com.blecua84.moneytransfers.services.models.Transfer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 public class AppMainRunner {
 
     private static JettyServer jettyServerInstance;
     private static TransfersServlet transfersServletInstance;
-    private static ServletUtils servletUtilsInstance;
+    private static DefaultServletUtils servletUtilsInstance;
 
     private static TransfersDTOToModelConverter transfersDTOToModelConverterInstance;
     private static AccountDTOToModelConverter accountDTOToModelConverterInstance;
@@ -35,6 +36,8 @@ public class AppMainRunner {
     private static DataManager dataManagerInstance;
     private static DefaultAccountDAO accountDAOInstance;
     private static DefaultTransfersDAO transfersDAOInstance;
+
+    private static ObjectMapper objectMapperInstance;
 
     public static JettyServer getJettyServerInstance() {
         return jettyServerInstance;
@@ -53,31 +56,23 @@ public class AppMainRunner {
         initInstances();
         injectDependencies();
 
-        injectDataInDB();
+        try {
+            injectDataInDB();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private static void injectDataInDB() {
-        Account account1 = new Account("010203", "12345678", 5000.00F);
-        Account account2 = new Account("010203", "12345680", 2500.00F);
+    private static void injectDataInDB() throws IOException {
+        InputStream accounts = ClassLoader.getSystemClassLoader().getResourceAsStream("load-initial-data.json");
+        Account[] accountList = objectMapperInstance.readValue(accounts, Account[].class);
 
-        log.info("Persisting accounts...");
-        log.info("Account 1: " + account1.toString());
-        log.info("Account 2: " + account2.toString());
-
-        try {
-            accountDAOInstance.saveAccount(account1);
-            accountDAOInstance.saveAccount(account2);
-
-            Transfer newTransfer = new Transfer(account1, account2, 100);
-            transfersServiceInstance.create(newTransfer);
-
-            for (Transfer transfer : transfersServiceInstance.getTransfers()) {
-                log.info("New Transfer found: " + transfer.toString());
+        for (Account account : accountList) {
+            try {
+                accountDAOInstance.saveAccount(account);
+            } catch (DataManagerException e) {
+                log.error(e.getMessage(), e);
             }
-        } catch (TransfersException e) {
-            log.error(e.getMessage(), e);
-        } catch (DataManagerException e) {
-            e.printStackTrace();
         }
     }
 
@@ -93,6 +88,7 @@ public class AppMainRunner {
         dataManagerInstance = DefaultDataManager.getInstance();
         accountDAOInstance = DefaultAccountDAO.getInstance();
         transfersDAOInstance = DefaultTransfersDAO.getInstance();
+        objectMapperInstance = new ObjectMapper();
     }
 
     private static void injectDependencies() {
@@ -100,6 +96,8 @@ public class AppMainRunner {
         transfersServletInstance.setTransfersDTOToModelConverter(transfersDTOToModelConverterInstance);
         transfersServletInstance.setServletUtils(servletUtilsInstance);
         transfersServletInstance.setTransferListToTransferDTOConverter(transferListToTransferDTOConverter);
+        transfersServletInstance.setObjectMapper(objectMapperInstance);
+        servletUtilsInstance.setObjectMapper(objectMapperInstance);
         jettyServerInstance.setServlet(transfersServletInstance);
         transfersDTOToModelConverterInstance.setAccountDTOToModelConverter(accountDTOToModelConverterInstance);
         transferListToTransferDTOConverter.setAccountToDTOModelConverter(accountToDTOModelConverter);
@@ -107,5 +105,6 @@ public class AppMainRunner {
         transfersDAOInstance.setDataManager(dataManagerInstance);
         transfersDAOInstance.setAccountDAO(accountDAOInstance);
         transfersServiceInstance.setTransfersDAO(transfersDAOInstance);
+        transfersServiceInstance.setAccountDAO(accountDAOInstance);
     }
 }
