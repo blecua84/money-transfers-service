@@ -115,7 +115,7 @@ The server will have the following endpoints available:
             ]
         } 
         ```
-    - **Error Response:** 
+    - **Example:**
         ```
         curl http://localhost:8080/transfers
         ```
