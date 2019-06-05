@@ -85,7 +85,7 @@ The server will have the following endpoints available:
         ```
         curl --header "Content-Type: application/json" \
           --request POST \
-          --data '{"from": {"sortCode": "010207","accountNumber": "12345678"},"to": {"sortCode": "090129","accountNumber": "12340002" }, "amount": "90.50" }' \
+          --data '{"from": {"sortCode": "010203","accountNumber": "12345678"},"to": {"sortCode": "090129","accountNumber": "12340002" }, "amount": "90.50" }' \
           http://localhost:8080/transfers
         ```
 
@@ -104,13 +104,11 @@ The server will have the following endpoints available:
                 {
                     "from": {
                         "sortCode": "010203",
-                        "accountNumber": "12345678",
-                        "available": "4909.5"
+                        "accountNumber": "12345678"
                     },
                     "to": {
                         "sortCode": "090129",
-                        "accountNumber": "12340002",
-                        "available": "677.74"
+                        "accountNumber": "12340002"
                     },
                     "amount": "90.5"
                 }
