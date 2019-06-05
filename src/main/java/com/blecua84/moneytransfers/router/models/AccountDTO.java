@@ -1,5 +1,6 @@
 package com.blecua84.moneytransfers.router.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class AccountDTO {
     @NotNull(message = ACCOUNT_NUMBER_NOT_VALID_MSG)
     @Pattern(regexp = ACCOUNT_NUMBER_REGEX, message = ACCOUNT_NUMBER_NOT_VALID_MSG)
     private String accountNumber;
+    @JsonIgnore
     private String available;
 
     public AccountDTO(@NotNull(message = SORT_CODE_NOT_VALID_MSG)
