@@ -4,6 +4,7 @@ import com.blecua84.moneytransfers.core.ServletUtils;
 import com.blecua84.moneytransfers.core.exceptions.ServletUtilsException;
 import com.blecua84.moneytransfers.router.models.AccountDTO;
 import com.blecua84.moneytransfers.router.models.TransferDTO;
+import com.blecua84.moneytransfers.test.utils.TestHttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -11,8 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class DefaultServletUtilsTest {
 
@@ -73,9 +72,9 @@ class DefaultServletUtilsTest {
     }
 
     private HttpServletRequest getMockedRequestWithBodyFromFilePath(String filePath) throws IOException {
-        HttpServletRequest request = mock(HttpServletRequest.class);
+        final TestHttpServletRequest request = new TestHttpServletRequest();
         BufferedReader bufferedReader = getBufferedReaderByFilePath(filePath);
-        when(request.getReader()).thenReturn(bufferedReader);
+        request.setReader(bufferedReader);
         return request;
     }
 

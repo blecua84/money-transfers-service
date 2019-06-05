@@ -7,6 +7,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 @Slf4j
 public class JettyServer {
@@ -32,7 +33,13 @@ public class JettyServer {
 
     public void start(int port) throws Exception {
         log.info("Init start in port: " + port);
-        this.server = new Server();
+
+        int maxThreads = 100;
+        int minThreads = 10;
+        int idleTimeout = 120;
+
+        this.server = new Server(new QueuedThreadPool(maxThreads, minThreads, idleTimeout));
+
         ServerConnector connector = new ServerConnector(this.server);
         connector.setPort(port);
         server.setConnectors(new Connector[]{connector});

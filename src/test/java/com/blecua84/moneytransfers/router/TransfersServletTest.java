@@ -10,6 +10,7 @@ import com.blecua84.moneytransfers.services.TransfersService;
 import com.blecua84.moneytransfers.services.exceptions.TransfersException;
 import com.blecua84.moneytransfers.services.models.Account;
 import com.blecua84.moneytransfers.services.models.Transfer;
+import com.blecua84.moneytransfers.test.utils.TestHttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -55,13 +56,6 @@ class TransfersServletTest {
     }
 
     @Test
-    void doPost_shouldExist() throws ClassNotFoundException, NoSuchMethodException {
-        assertNotNull(Class.forName("com.blecua84.moneytransfers.router.TransfersServlet").getMethod(
-                "doPost",
-                HttpServletRequest.class, HttpServletResponse.class));
-    }
-
-    @Test
     void doPost_whenItIsInvoked_shouldTranslateTheInputToServiceModel() throws IOException, ServletUtilsException, ConverterException {
         TransferDTO inputTransferToDo = new TransferDTO(
                 new AccountDTO("010203", "43546576"),
@@ -72,7 +66,7 @@ class TransfersServletTest {
                 new Account("010203", "12345678", 40F),
                 150F);
         when(this.transfersDTOToModelConverter.convert(eq(inputTransferToDo))).thenReturn(transferToDo);
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
+        HttpServletRequest mockRequest = new TestHttpServletRequest();
         when(this.servletUtils.readBody(eq(mockRequest), eq(TransferDTO.class))).thenReturn(inputTransferToDo);
         HttpServletResponse mockResponse = mock(HttpServletResponse.class);
         when(mockResponse.getWriter()).thenReturn(mock(PrintWriter.class));
@@ -93,7 +87,7 @@ class TransfersServletTest {
                 new Account("010203", "12345678", 40F),
                 150F);
         when(this.transfersDTOToModelConverter.convert(eq(inputTransferToDo))).thenReturn(transferToDo);
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
+        HttpServletRequest mockRequest = new TestHttpServletRequest();
         when(this.servletUtils.readBody(eq(mockRequest), eq(TransferDTO.class))).thenReturn(inputTransferToDo);
         HttpServletResponse mockResponse = mock(HttpServletResponse.class);
         when(mockResponse.getWriter()).thenReturn(mock(PrintWriter.class));

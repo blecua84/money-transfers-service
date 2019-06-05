@@ -11,6 +11,18 @@
         <appender-ref ref="CONSOLE"/>
     </logger>
 
+    <logger name="org.hibernate" level="info" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="javax.persistence" level="info" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="org.hibernate.type" level="info" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
     <root level="error">
         <appender-ref ref="STDOUT"/>
     </root>
