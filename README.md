@@ -1,5 +1,9 @@
 # money-transfers-service
-A service which provides a RESTFull API to move money from accounts.
+A service which provides a RESTFull API to move money from accounts. 
+
+This version is built without any framework, such a Spring or Struts. Although, we have used Hibernate to manage the data base, which will be on memory (H2). The service is executable itself, so the only thing you have to do is to generate the jar and execute it.
+
+Good luck!
 
 Pre-requirements
 --
