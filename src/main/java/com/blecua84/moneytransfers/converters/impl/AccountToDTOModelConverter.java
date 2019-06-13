@@ -24,11 +24,11 @@ public class AccountToDTOModelConverter implements Converter<Account, AccountDTO
     public AccountDTO convert(Account account) {
         AccountDTO targetAccount = null;
 
-        if (!ofNullable(account).isEmpty()) {
+        if (ofNullable(account).isPresent()) {
             targetAccount = new AccountDTO(
                     account.getSortCode(),
                     account.getAccountNumber(),
-                    Float.toString(account.getAvailable()));
+                    account.getAvailable().toPlainString());
         }
 
         return targetAccount;

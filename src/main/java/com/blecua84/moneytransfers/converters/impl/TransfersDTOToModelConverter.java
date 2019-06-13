@@ -5,12 +5,16 @@ import com.blecua84.moneytransfers.converters.exceptions.ConverterException;
 import com.blecua84.moneytransfers.router.models.TransferDTO;
 import com.blecua84.moneytransfers.services.models.Transfer;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import static java.util.Optional.ofNullable;
 
 public class TransfersDTOToModelConverter implements Converter<TransferDTO, Transfer> {
 
     private static final String AMOUNT_CONVERSION_ERROR_MESSAGE =
             "There was an error trying to get the amount numeric number.";
+    private static final int SCALE_FACTOR = 2;
     private static TransfersDTOToModelConverter instance;
 
     private AccountDTOToModelConverter accountDTOToModelConverter;
@@ -35,7 +39,7 @@ public class TransfersDTOToModelConverter implements Converter<TransferDTO, Tran
                 result = new Transfer(
                         this.accountDTOToModelConverter.convert(transferDTO.getFrom()),
                         this.accountDTOToModelConverter.convert(transferDTO.getTo()),
-                        Float.parseFloat(transferDTO.getAmount()));
+                        convertStringMoneyToBigDecimal(transferDTO.getAmount()));
             }
         } catch (NumberFormatException e) {
             e.printStackTrace();
@@ -43,5 +47,10 @@ public class TransfersDTOToModelConverter implements Converter<TransferDTO, Tran
         }
 
         return result;
+    }
+
+    private BigDecimal convertStringMoneyToBigDecimal(String money) {
+        BigDecimal amount = new BigDecimal(money);
+        return amount.setScale(SCALE_FACTOR, RoundingMode.HALF_EVEN);
     }
 }

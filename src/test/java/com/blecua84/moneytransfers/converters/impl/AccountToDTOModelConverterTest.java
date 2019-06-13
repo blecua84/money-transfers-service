@@ -4,6 +4,8 @@ import com.blecua84.moneytransfers.router.models.AccountDTO;
 import com.blecua84.moneytransfers.services.models.Account;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class AccountToDTOModelConverterTest {
@@ -30,13 +32,13 @@ class AccountToDTOModelConverterTest {
 
     @Test
     void convert_whenInputIsNotNull_shouldReturnANewObjectWithSameInformation() {
-        Account sourceAccount = new Account(1, "010101", "12345678", 1000);
+        Account sourceAccount = new Account(1, "010101", "12345678", new BigDecimal(1000));
 
         AccountDTO targetAccount = converter.convert(sourceAccount);
 
         assertNotNull(targetAccount);
         assertEquals(sourceAccount.getSortCode(), targetAccount.getSortCode());
         assertEquals(sourceAccount.getAccountNumber(), targetAccount.getAccountNumber());
-        assertEquals(Float.toString(sourceAccount.getAvailable()), targetAccount.getAvailable());
+        assertEquals(sourceAccount.getAvailable().toPlainString(), targetAccount.getAvailable());
     }
 }

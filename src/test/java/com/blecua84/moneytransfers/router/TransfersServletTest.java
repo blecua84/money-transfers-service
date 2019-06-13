@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,9 +66,9 @@ class TransfersServletTest {
                 new AccountDTO("010203", "12345678"),
                 "150");
         Transfer transferToDo = new Transfer(
-                new Account("010203", "43546576", 250.45F),
-                new Account("010203", "12345678", 40F),
-                150F);
+                new Account("010203", "43546576", new BigDecimal(250.45)),
+                new Account("010203", "12345678", new BigDecimal(40)),
+                new BigDecimal(150));
         when(this.transfersDTOToModelConverter.convert(eq(inputTransferToDo))).thenReturn(transferToDo);
         HttpServletRequest mockRequest = new TestHttpServletRequest();
         when(this.servletUtils.readBody(eq(mockRequest), eq(TransferDTO.class))).thenReturn(inputTransferToDo);
@@ -86,9 +87,9 @@ class TransfersServletTest {
                 new AccountDTO("010203", "12345678"),
                 "150");
         Transfer transferToDo = new Transfer(
-                new Account("010203", "43546576", 250.45F),
-                new Account("010203", "12345678", 40F),
-                150F);
+                new Account("010203", "43546576", new BigDecimal(250.45)),
+                new Account("010203", "12345678", new BigDecimal(40)),
+                new BigDecimal(150));
         when(this.transfersDTOToModelConverter.convert(eq(inputTransferToDo))).thenReturn(transferToDo);
         HttpServletRequest mockRequest = new TestHttpServletRequest();
         when(this.servletUtils.readBody(eq(mockRequest), eq(TransferDTO.class))).thenReturn(inputTransferToDo);

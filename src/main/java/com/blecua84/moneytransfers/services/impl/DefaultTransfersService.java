@@ -11,6 +11,7 @@ import com.blecua84.moneytransfers.services.models.Transfer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
@@ -44,7 +45,7 @@ public class DefaultTransfersService implements TransfersService {
         try {
             fetchAccountFromDB(transfer);
 
-            if (hasAccountFromEnoughMoney(transfer)) {
+            if (!hasAccountFromEnoughMoney(transfer)) {
                 log.error(ACCOUNT_WITH_NO_ENOUGH_FUNDS);
                 throw new TransfersException(ACCOUNT_WITH_NO_ENOUGH_FUNDS);
             }
@@ -78,7 +79,7 @@ public class DefaultTransfersService implements TransfersService {
     }
 
     private boolean hasAccountFromEnoughMoney(Transfer transfer) {
-        return transfer.getFrom().getAvailable() - transfer.getAmount() < 0;
+        return transfer.getFrom().getAvailable().compareTo(transfer.getAmount()) > 0;
     }
 
     private void fetchAccountFromDB(Transfer transfer) throws DataManagerException {
@@ -93,14 +94,14 @@ public class DefaultTransfersService implements TransfersService {
 
     }
 
-    private Account takeOutMoneyFromAccount(Account account, float amount) {
-        account.setAvailable(account.getAvailable() - amount);
+    private Account takeOutMoneyFromAccount(Account account, BigDecimal amount) {
+        account.setAvailable(account.getAvailable().subtract(amount));
 
         return account;
     }
 
-    private Account takeInMoneyToAccount(Account account, float amount) {
-        account.setAvailable(account.getAvailable() + amount);
+    private Account takeInMoneyToAccount(Account account, BigDecimal amount) {
+        account.setAvailable(account.getAvailable().add(amount));
 
         return account;
     }

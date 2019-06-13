@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
@@ -25,9 +26,9 @@ public class Account {
     private String accountNumber;
 
     @Column(name = "available")
-    private float available;
+    private BigDecimal available;
 
-    public Account(String sortCode, String accountNumber, float available) {
+    public Account(String sortCode, String accountNumber, BigDecimal available) {
         this.sortCode = sortCode;
         this.accountNumber = accountNumber;
         this.available = available;

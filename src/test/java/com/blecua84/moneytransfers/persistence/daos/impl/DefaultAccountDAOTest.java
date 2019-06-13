@@ -12,6 +12,8 @@ import org.hibernate.query.Query;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -64,7 +66,7 @@ class DefaultAccountDAOTest {
         instance.setDataManager(null);
 
         try {
-            instance.saveAccount(new Account("010101", "12345678", 100));
+            instance.saveAccount(new Account("010101", "12345678", new BigDecimal(100)));
             fail();
         } catch (DataManagerException e) {
             assertEquals(AccountDAO.ACCOUNT_CANNOT_BE_SAVED, e.getMessage());
@@ -76,7 +78,7 @@ class DefaultAccountDAOTest {
         when(dataManager.getSessionFactory()).thenReturn(null);
 
         try {
-            instance.saveAccount(new Account("010101", "12345678", 100));
+            instance.saveAccount(new Account("010101", "12345678", new BigDecimal(100)));
             fail();
         } catch (DataManagerException e) {
             assertEquals(AccountDAO.ACCOUNT_CANNOT_BE_SAVED, e.getMessage());
@@ -89,7 +91,7 @@ class DefaultAccountDAOTest {
         when(sessionFactory.openSession()).thenThrow(mock(HibernateException.class));
 
         try {
-            instance.saveAccount(new Account("010101", "12345678", 100));
+            instance.saveAccount(new Account("010101", "12345678", new BigDecimal(100)));
             fail();
         } catch (DataManagerException e) {
             assertEquals(AccountDAO.ACCOUNT_CANNOT_BE_SAVED, e.getMessage());
@@ -104,7 +106,7 @@ class DefaultAccountDAOTest {
         doThrow(mock(HibernateException.class)).when(session).save(any());
 
         try {
-            instance.saveAccount(new Account("010101", "12345678", 100));
+            instance.saveAccount(new Account("010101", "12345678", new BigDecimal(100)));
             fail();
         } catch (DataManagerException e) {
             assertEquals(AccountDAO.ACCOUNT_CANNOT_BE_SAVED, e.getMessage());
@@ -123,7 +125,7 @@ class DefaultAccountDAOTest {
         when(session.beginTransaction()).thenReturn(transaction);
 
         try {
-            instance.saveAccount(new Account("010101", "12345678", 100));
+            instance.saveAccount(new Account("010101", "12345678", new BigDecimal(100)));
 
             verify(instance.getDataManager(), times(2)).getSessionFactory();
             verify(dataManager, times(2)).getSessionFactory();
@@ -197,7 +199,7 @@ class DefaultAccountDAOTest {
         when(query.getSingleResult()).thenReturn(mockResult);
         when(session.beginTransaction()).thenReturn(transaction);
 
-        instance.updateAccount(session, new Account(1, "010101", "12345678", 100));
+        instance.updateAccount(session, new Account(1, "010101", "12345678", new BigDecimal(100)));
 
         verify(session).update(any());
     }
@@ -211,7 +213,7 @@ class DefaultAccountDAOTest {
         doThrow(HibernateException.class).when(session).update(any());
 
         try {
-            instance.updateAccount(session, new Account(1, "010101", "12345678", 100));
+            instance.updateAccount(session, new Account(1, "010101", "12345678", new BigDecimal(100)));
         } catch (DataManagerException e) {
             verify(session).update(any());
             assertEquals(instance.ACCOUNT_CANNOT_BE_UPDATED, e.getMessage());

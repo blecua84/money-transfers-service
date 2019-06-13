@@ -8,6 +8,8 @@ import com.blecua84.moneytransfers.services.models.Transfer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -43,7 +45,7 @@ class TransfersDTOToModelConverterTest {
                 new AccountDTO("020202", "13121415"),
                 "10.5");
         when(this.accountDTOConverter.convert(any(AccountDTO.class))).thenReturn(
-                new Account("01", "02", 0F));
+                new Account("01", "02", new BigDecimal(0)));
 
         this.converter.convert(transferDTO);
 
@@ -56,12 +58,12 @@ class TransfersDTOToModelConverterTest {
 
         Transfer result = converter.convert(transferDTO);
 
-        assertEquals(10.5F, result.getAmount());
+        assertEquals("10.50", result.getAmount().toPlainString());
     }
 
     @Test
     void convert_whenAmountIsNotValidAsAFloat_shouldThrowAConverterException() {
-        TransferDTO transferDTO = new TransferDTO(null, null, "NOT VALID FLOAT");
+        TransferDTO transferDTO = new TransferDTO(null, null, "NOT VALID NUMBER");
 
         try {
             converter.convert(transferDTO);

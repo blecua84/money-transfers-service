@@ -6,6 +6,7 @@ import com.blecua84.moneytransfers.services.models.Transfer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,7 +44,7 @@ class TransferListToTransferDTOConverterTest {
     @Test
     void convert_whenInputIsCorrect_shouldReturnTheSameNumbersOfElementThanTheInput() {
         List<Transfer> sourceList = Collections.singletonList(new Transfer(1,
-                mock(Account.class), mock(Account.class), 100));
+                mock(Account.class), mock(Account.class), new BigDecimal(100)));
         AccountToDTOModelConverter mockAccountConverter = mock(AccountToDTOModelConverter.class);
         this.converter.setAccountToDTOModelConverter(mockAccountConverter);
 

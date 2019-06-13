@@ -5,6 +5,8 @@ import com.blecua84.moneytransfers.services.models.Account;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class AccountDTOToModelConverterTest {
@@ -37,7 +39,7 @@ class AccountDTOToModelConverterTest {
 
         assertEquals(accountDTO.getSortCode(), result.getSortCode());
         assertEquals(accountDTO.getAccountNumber(), result.getAccountNumber());
-        assertEquals(0f, result.getAvailable());
+        assertEquals(new BigDecimal(0), result.getAvailable());
     }
 
     @Test

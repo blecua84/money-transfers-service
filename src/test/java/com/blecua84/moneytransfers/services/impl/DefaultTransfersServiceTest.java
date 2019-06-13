@@ -9,6 +9,7 @@ import com.blecua84.moneytransfers.services.models.Transfer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,8 +34,8 @@ class DefaultTransfersServiceTest {
         this.transfersService.setTransfersDAO(this.transfersDAO);
         this.transfersService.setAccountDAO(this.accountDAO);
 
-        transferToDo = new Transfer(new Account("123456", "12345678", 5000),
-                new Account("123256", "12340008", 3500.10F), 100);
+        transferToDo = new Transfer(new Account("123456", "12345678", new BigDecimal(5000)),
+                new Account("123256", "12340008", new BigDecimal(3500.10)), new BigDecimal(100));
     }
 
     @Test
@@ -106,9 +107,9 @@ class DefaultTransfersServiceTest {
     @Test
     void createTransfer_whenAccountFromIsTheSameThanAccountToo_shouldThrowAnException() {
         Transfer transferWithSameAccounts = new Transfer(
-                new Account("123456", "12345678", 120),
-                new Account("123456", "12345678", 120),
-                100);
+                new Account("123456", "12345678", new BigDecimal(120)),
+                new Account("123456", "12345678", new BigDecimal(120)),
+                new BigDecimal(100));
 
         try {
             this.transfersService.create(transferWithSameAccounts);
@@ -122,8 +123,8 @@ class DefaultTransfersServiceTest {
     void createTransfer_whenAccountFromHasNotEnoughFundsToDoTheTransfer_shouldThrowAnException()
             throws DataManagerException {
         when(this.accountDAO.getAccountBySortCodeAndNumber(any(), any()))
-                .thenReturn(new Account(1, "123456", "12345678", 50))
-                .thenReturn(new Account(2, "123456", "12345678", 120));
+                .thenReturn(new Account(1, "123456", "12345678", new BigDecimal(50)))
+                .thenReturn(new Account(2, "123456", "12345678", new BigDecimal(120)));
 
         try {
             this.transfersService.create(transferToDo);
@@ -138,14 +139,15 @@ class DefaultTransfersServiceTest {
     void createTransfer_whenAccountsAreCorrect_shouldUpdateTheirNewAmountAvailable()
             throws DataManagerException, TransfersException {
         when(this.accountDAO.getAccountBySortCodeAndNumber(any(), any()))
-                .thenReturn(new Account(1, "123456", "12345678", 5000.25F))
-                .thenReturn(new Account(2, "123456", "12345678", 1200.00F));
+                .thenReturn(new Account(1, "123456", "12345678", new BigDecimal(5000.25)))
+                .thenReturn(new Account(2, "123456", "12345678", new BigDecimal(1200.00)));
 
         this.transfersService.create(transferToDo);
 
         verify(this.transfersDAO).saveTransfers(
-                eq(new Transfer(new Account(1, "123456", "12345678", 4900.25F),
-                        new Account(2, "123456", "12345678", 1300.00F), 100)));
+                eq(new Transfer(new Account(1, "123456", "12345678", new BigDecimal(4900.25)),
+                        new Account(2, "123456", "12345678", new BigDecimal(1300.00)),
+                        new BigDecimal(100))));
     }
 
     @Test

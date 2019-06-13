@@ -41,7 +41,7 @@ public class TransferListToTransferDTOConverter implements Converter<List<Transf
                 targetTransfers.add(new TransferDTO(
                         accountToDTOModelConverter.convert(transfer.getFrom()),
                         accountToDTOModelConverter.convert(transfer.getTo()),
-                        Float.toString(transfer.getAmount())));
+                        transfer.getAmount().toPlainString()));
             }
         }
 

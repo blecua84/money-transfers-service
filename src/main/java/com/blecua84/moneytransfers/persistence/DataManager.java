@@ -4,5 +4,5 @@ import org.hibernate.SessionFactory;
 
 public interface DataManager {
 
-    public SessionFactory getSessionFactory();
+    SessionFactory getSessionFactory();
 }
