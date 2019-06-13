@@ -4,12 +4,14 @@ import com.blecua84.moneytransfers.converters.Converter;
 import com.blecua84.moneytransfers.converters.exceptions.ConverterException;
 import com.blecua84.moneytransfers.router.models.TransferDTO;
 import com.blecua84.moneytransfers.services.models.Transfer;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import static java.util.Optional.ofNullable;
 
+@Slf4j
 public class TransfersDTOToModelConverter implements Converter<TransferDTO, Transfer> {
 
     private static final String AMOUNT_CONVERSION_ERROR_MESSAGE =
@@ -42,7 +44,7 @@ public class TransfersDTOToModelConverter implements Converter<TransferDTO, Tran
                         convertStringMoneyToBigDecimal(transferDTO.getAmount()));
             }
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            log.error(AMOUNT_CONVERSION_ERROR_MESSAGE, e);
             throw new ConverterException(AMOUNT_CONVERSION_ERROR_MESSAGE);
         }
 
