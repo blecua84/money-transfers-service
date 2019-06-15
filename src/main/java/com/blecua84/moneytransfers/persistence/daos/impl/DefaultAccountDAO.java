@@ -13,6 +13,9 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
 import javax.persistence.NoResultException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -32,9 +35,15 @@ public class DefaultAccountDAO extends CommonDAO implements AccountDAO {
     private Function<SessionFactory, Boolean> isSessionFactoryNull = factory -> isObjectNull.apply(factory);
     private BiConsumer<Session, Account> saveAccount = Session::save;
     private BiConsumer<Session, Account> updateAccount = Session::update;
+    private ReadWriteLock lock;
+    private Lock writeLock;
+    private Lock readLock;
 
     private DefaultAccountDAO() {
         super();
+        this.lock = new ReentrantReadWriteLock();
+        this.writeLock = lock.writeLock();
+        this.readLock = lock.readLock();
     }
 
     public static DefaultAccountDAO getInstance() {
@@ -47,23 +56,79 @@ public class DefaultAccountDAO extends CommonDAO implements AccountDAO {
     @Override
     public void saveAccount(Account account) throws DataManagerException {
         log.info("Init saveAccount");
-        if (isAccountNull.apply(account)) {
-            throw new DataManagerException(ACCOUNT_NULL_MESSAGE);
-        }
 
-        if (isInstanceNull.apply(instance) || isDataManagerNull.apply(instance.getDataManager())) {
-            throw new DataManagerException(ACCOUNT_CANNOT_BE_SAVED);
-        }
+        try {
+            log.debug("Locking thread...");
+            writeLock.lock();
 
-        if (isSessionFactoryNull.apply(instance.getDataManager().getSessionFactory())) {
-            throw new DataManagerException(ACCOUNT_CANNOT_BE_SAVED);
-        }
+            if (isAccountNull.apply(account)) {
+                throw new DataManagerException(ACCOUNT_NULL_MESSAGE);
+            }
 
-        log.debug("Account: " + account.toString());
-        execTransactionalOperation(instance.getDataManager(), ACCOUNT_CANNOT_BE_SAVED, saveAccount, account);
+            if (isInstanceNull.apply(instance) || isDataManagerNull.apply(instance.getDataManager())) {
+                throw new DataManagerException(ACCOUNT_CANNOT_BE_SAVED);
+            }
+
+            if (isSessionFactoryNull.apply(instance.getDataManager().getSessionFactory())) {
+                throw new DataManagerException(ACCOUNT_CANNOT_BE_SAVED);
+            }
+
+            log.debug("Account: " + account.toString());
+            execTransactionalOperation(instance.getDataManager(), ACCOUNT_CANNOT_BE_SAVED, saveAccount, account);
+        } finally {
+            log.debug("Releasing thread...");
+            writeLock.unlock();
+            log.debug("Thread released!");
+        }
 
         log.info("Account successfully saved");
         log.info("End saveAccount");
+    }
+
+    @Override
+    public Account getAccountBySortCodeAndNumber(String sortCode, String accountNumber) throws DataManagerException {
+        log.info("Init getAccountBySortCodeAndNumber");
+        log.debug("sortCode: " + sortCode);
+        log.debug("accountNumber: " + accountNumber);
+
+        Account result;
+        try {
+            log.debug("Locking thread...");
+            readLock.lock();
+
+            result = execNonTransactionalConcreteOperation(
+                    instance.getDataManager(), ACCOUNT_CANNOT_BE_FETCHED, sortCode, accountNumber);
+        } finally {
+            log.debug("Releasing thread...");
+            readLock.unlock();
+            log.debug("Thread released!");
+        }
+
+        log.info("End getAccountBySortCodeAndNumber");
+        return result;
+    }
+
+    @Override
+    public void updateAccount(Session session, Account account) throws DataManagerException {
+        log.info("Init updateAccount");
+
+        try {
+            log.debug("Locking thread...");
+            writeLock.lock();
+
+            if (isAccountNull.apply(account)) {
+                throw new DataManagerException(ACCOUNT_NULL_MESSAGE);
+            }
+
+            execNonExplicitTransactionalOperation(session, ACCOUNT_CANNOT_BE_UPDATED, updateAccount, account);
+        } finally {
+            log.debug("Releasing thread...");
+            writeLock.unlock();
+            log.debug("Thread released!");
+        }
+
+        log.debug("Account: " + account.toString());
+        log.info("End updateAccount");
     }
 
     @Override
@@ -87,32 +152,5 @@ public class DefaultAccountDAO extends CommonDAO implements AccountDAO {
         result = (Account) query.getSingleResult();
         log.debug("Account retrieved: " + result.toString());
         return (T) result;
-    }
-
-    @Override
-    public Account getAccountBySortCodeAndNumber(String sortCode, String accountNumber) throws DataManagerException {
-        log.info("Init getAccountBySortCodeAndNumber");
-        log.debug("sortCode: " + sortCode);
-        log.debug("accountNumber: " + accountNumber);
-
-        Account result = execNonTransactionalConcreteOperation(
-                instance.getDataManager(), ACCOUNT_CANNOT_BE_FETCHED, sortCode, accountNumber);
-
-        log.info("End getAccountBySortCodeAndNumber");
-        return result;
-    }
-
-    @Override
-    public void updateAccount(Session session, Account account) throws DataManagerException {
-        log.info("Init updateAccount");
-
-        if (isAccountNull.apply(account)) {
-            throw new DataManagerException(ACCOUNT_NULL_MESSAGE);
-        }
-
-        execNonExplicitTransactionalOperation(session, ACCOUNT_CANNOT_BE_UPDATED, updateAccount, account);
-
-        log.debug("Account: " + account.toString());
-        log.info("End updateAccount");
     }
 }

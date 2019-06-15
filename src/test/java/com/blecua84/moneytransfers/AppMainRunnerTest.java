@@ -1,8 +1,11 @@
 package com.blecua84.moneytransfers;
 
+import com.blecua84.moneytransfers.persistence.daos.impl.DefaultAccountDAO;
+import com.blecua84.moneytransfers.persistence.exceptions.DataManagerException;
 import com.blecua84.moneytransfers.router.models.AccountDTO;
 import com.blecua84.moneytransfers.router.models.ResultDTO;
 import com.blecua84.moneytransfers.router.models.TransferDTO;
+import com.blecua84.moneytransfers.services.models.Account;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -48,9 +52,12 @@ class AppMainRunnerTest {
 
     @Test
     void transfersEndpoint_whenItIsInvokedWithBody_shouldCallToTheService()
-            throws URISyntaxException, InterruptedException, FileNotFoundException {
+            throws URISyntaxException, InterruptedException, FileNotFoundException, DataManagerException {
+        DefaultAccountDAO accountDAO = DefaultAccountDAO.getInstance();
+        accountDAO.saveAccount(new Account("090129", "12340013", new BigDecimal(1000)));
+        accountDAO.saveAccount(new Account("090129", "12340014", new BigDecimal(2000)));
         HttpRequest httpRequest = createHttpRequestPostWithBody(
-                "src/test/resources/test-files/transfers-input-01.json");
+                "src/test/resources/test-files/transfers-input-16.json");
 
         executeTest(httpRequest, 200, "Operation successfully executed");
     }

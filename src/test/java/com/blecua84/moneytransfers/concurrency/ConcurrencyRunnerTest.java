@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -42,7 +41,7 @@ class ConcurrencyRunnerTest {
 
         transferExecutorList.parallelStream().forEach(TransferExecutor::run);
 
-        for(TransferExecutor executor: transferExecutorList) {
+        for (TransferExecutor executor : transferExecutorList) {
             assertEquals(200, executor.getResult().statusCode());
         }
     }

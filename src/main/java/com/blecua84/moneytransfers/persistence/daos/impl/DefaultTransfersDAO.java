@@ -14,6 +14,9 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
@@ -27,8 +30,14 @@ public class DefaultTransfersDAO extends CommonDAO implements TransfersDAO {
     Function<Transfer, Boolean> isTransferNull = transfer -> !ofNullable(transfer).isPresent();
     private DataManager dataManager;
     private AccountDAO accountDAO;
+    private ReadWriteLock lock;
+    private Lock writeLock;
+    private Lock readLock;
 
     private DefaultTransfersDAO() {
+        this.lock = new ReentrantReadWriteLock();
+        this.writeLock = this.lock.writeLock();
+        this.readLock = this.lock.readLock();
     }
 
     public static DefaultTransfersDAO getInstance() {
@@ -39,26 +48,35 @@ public class DefaultTransfersDAO extends CommonDAO implements TransfersDAO {
     }
 
     @Override
-    public synchronized void saveTransfers(Transfer transfer) throws DataManagerException {
+    public void saveTransfers(Transfer transfer) throws DataManagerException {
         log.info("Init saveTransfers");
         log.debug("Input Transfer: " + transfer);
 
-        if (isTransferNull.apply(transfer)) {
-            throw new DataManagerException(INPUT_TRANSFER_IS_NULL);
-        }
+        try {
+            log.debug("Locking thread...");
+            writeLock.lock();
 
-        Transaction transaction = null;
+            if (isTransferNull.apply(transfer)) {
+                throw new DataManagerException(INPUT_TRANSFER_IS_NULL);
+            }
 
-        try (Session session = instance.getDataManager().getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
+            Transaction transaction = null;
 
-            accountDAO.updateAccount(session, transfer.getFrom());
-            accountDAO.updateAccount(session, transfer.getTo());
-            session.save(transfer);
+            try (Session session = instance.getDataManager().getSessionFactory().openSession()) {
+                transaction = session.beginTransaction();
 
-            transaction.commit();
-        } catch (HibernateException e) {
-            rollbackAndThrowException(transaction, e, TRANSFER_CANNOT_BE_SAVED);
+                accountDAO.updateAccount(session, transfer.getFrom());
+                accountDAO.updateAccount(session, transfer.getTo());
+                session.save(transfer);
+
+                transaction.commit();
+            } catch (HibernateException e) {
+                rollbackAndThrowException(transaction, e, TRANSFER_CANNOT_BE_SAVED);
+            }
+        } finally {
+            log.debug("Releasing thread...");
+            writeLock.unlock();
+            log.debug("Thread released!");
         }
 
         log.debug("Transfer " + transfer.toString() + " has been stored successfully.");
@@ -69,9 +87,19 @@ public class DefaultTransfersDAO extends CommonDAO implements TransfersDAO {
     public List<Transfer> getTransfers() throws DataManagerException {
         log.info("Init getTransfers");
 
-        List<Transfer> resultList = execNonTransactionalConcreteOperation(
-                instance.getDataManager(),
-                TRANSFER_CANNOT_BE_FETCHED);
+        List<Transfer> resultList;
+        try {
+            log.debug("Locking thread...");
+            readLock.lock();
+
+            resultList = execNonTransactionalConcreteOperation(
+                    instance.getDataManager(),
+                    TRANSFER_CANNOT_BE_FETCHED);
+        } finally {
+            log.debug("Releasing thread...");
+            readLock.unlock();
+            log.debug("Thread released!");
+        }
 
         log.info("End saveTransfers");
         return resultList;
