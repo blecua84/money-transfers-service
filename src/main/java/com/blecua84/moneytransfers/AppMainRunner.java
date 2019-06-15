@@ -17,8 +17,13 @@ import com.blecua84.moneytransfers.services.models.Account;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class AppMainRunner {
@@ -44,13 +49,15 @@ public class AppMainRunner {
     }
 
     public static void main(String[] args) throws Exception {
-        log.info("Start main");
+        printHeader();
+        Instant start = Instant.now();
 
         initComponents();
-
         jettyServerInstance.start(8080);
-        log.debug("Listening connections...");
+
+        printTimeElapsed(start);
     }
+
 
     private static void initComponents() {
         initInstances();
@@ -59,8 +66,24 @@ public class AppMainRunner {
         try {
             injectDataInDB();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
+    }
+
+    private static void printTimeElapsed(Instant startTime) {
+        Duration timeElapsed = Duration.between(startTime, Instant.now());
+        log.debug("Time elapsed: " + timeElapsed.toMillis() / 1000f + " seconds");
+    }
+
+    private static void printHeader() {
+        InputStream headerFile = ClassLoader.getSystemClassLoader().getResourceAsStream("header.txt");
+        assert headerFile != null;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(headerFile));
+        log.info(readAllLines(reader));
+    }
+
+    private static String readAllLines(BufferedReader reader) {
+        return reader.lines().collect(Collectors.joining(System.lineSeparator()));
     }
 
     private static void injectDataInDB() throws IOException {
