@@ -19,7 +19,7 @@
         <appender-ref ref="CONSOLE"/>
     </logger>
 
-    <logger name="org.hibernate.SQL" level="INFO">
+    <logger name="org.hibernate.SQL" level="DEBUG">
         <appender-ref ref="CONSOLE"/>
     </logger>
 
