@@ -39,7 +39,7 @@ public class DefaultTransfersDAO extends CommonDAO implements TransfersDAO {
     }
 
     @Override
-    public void saveTransfers(Transfer transfer) throws DataManagerException {
+    public synchronized void saveTransfers(Transfer transfer) throws DataManagerException {
         log.info("Init saveTransfers");
         log.debug("Input Transfer: " + transfer);
 

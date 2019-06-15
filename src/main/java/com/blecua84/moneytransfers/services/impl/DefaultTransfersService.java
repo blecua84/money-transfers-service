@@ -35,7 +35,7 @@ public class DefaultTransfersService implements TransfersService {
     }
 
     @Override
-    public void create(Transfer transfer) throws TransfersException {
+    public synchronized void create(Transfer transfer) throws TransfersException {
         log.info("Init create");
 
         checkInputParameter(transfer);
