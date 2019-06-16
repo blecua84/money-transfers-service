@@ -23,9 +23,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @EqualsAndHashCode(callSuper = true)
 @Slf4j
@@ -55,20 +52,22 @@ public class TransfersServlet extends BaseController {
         return instance;
     }
 
-    public void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        log.info("Init doPost");
-        CompletableFuture<ResultDTO> future = supplyAsync(() -> createTransfer(req));
-
-        executeCompletableFuture(future, resp);
-        log.info("End doPost");
+    @Override
+    protected ResultDTO processPostMethod(HttpServletRequest request) {
+        log.info("Init processPostMethod");
+        ResultDTO resultDTO = createTransfer(request);
+        log.debug("Result processPostMethod: " + resultDTO);
+        log.info("End processPostMethod");
+        return resultDTO;
     }
 
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) {
-        log.info("Init doGet");
-        CompletableFuture<ResultDTO> future = supplyAsync(this::getTransfers);
-
-        executeCompletableFuture(future, resp);
-        log.info("End doGet");
+    @Override
+    protected ResultDTO<List<TransferDTO>> processGetMethod() {
+        log.info("Init processGetMethod");
+        ResultDTO<List<TransferDTO>> resultDTO = getTransfers();
+        log.debug("Result processGetMethod: " + resultDTO);
+        log.info("End processGetMethod");
+        return resultDTO;
     }
 
     private ResultDTO createTransfer(HttpServletRequest req) {
