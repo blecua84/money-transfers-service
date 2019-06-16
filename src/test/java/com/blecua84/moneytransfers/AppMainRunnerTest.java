@@ -47,7 +47,7 @@ class AppMainRunnerTest {
     void tearDown() {
         this.httpClient = null;
 
-        AppMainRunner.getJettyServerInstance().stop();
+        AppMainRunner.stop();
     }
 
     @Test

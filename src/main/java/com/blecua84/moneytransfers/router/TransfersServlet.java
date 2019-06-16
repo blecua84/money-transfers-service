@@ -12,6 +12,7 @@ import com.blecua84.moneytransfers.services.TransfersService;
 import com.blecua84.moneytransfers.services.exceptions.TransfersException;
 import com.blecua84.moneytransfers.services.models.Transfer;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.annotation.WebServlet;
@@ -26,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
+@EqualsAndHashCode(callSuper = true)
 @Slf4j
 @Data
 @WebServlet(name = "transfersServlet", urlPatterns = TransfersServlet.URL_PATTERN, asyncSupported = true)

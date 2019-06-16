@@ -28,7 +28,7 @@ class ConcurrencyRunnerTest {
 
     @AfterEach
     void tearDown() {
-        AppMainRunner.getJettyServerInstance().stop();
+        AppMainRunner.stop();
     }
 
     @Test
