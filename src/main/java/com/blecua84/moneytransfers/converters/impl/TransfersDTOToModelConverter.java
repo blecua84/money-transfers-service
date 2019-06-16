@@ -7,6 +7,7 @@ import com.blecua84.moneytransfers.services.models.Transfer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 
 import static java.util.Optional.ofNullable;
@@ -52,7 +53,7 @@ public class TransfersDTOToModelConverter implements Converter<TransferDTO, Tran
     }
 
     private BigDecimal convertStringMoneyToBigDecimal(String money) {
-        BigDecimal amount = new BigDecimal(money);
+        BigDecimal amount = new BigDecimal(money, MathContext.UNLIMITED);
         return amount.setScale(SCALE_FACTOR, RoundingMode.HALF_EVEN);
     }
 }

@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,8 +36,10 @@ class DefaultTransfersServiceTest {
         this.transfersService.setTransfersDAO(this.transfersDAO);
         this.transfersService.setAccountDAO(this.accountDAO);
 
-        transferToDo = new Transfer(new Account("123456", "12345678", new BigDecimal(5000)),
-                new Account("123256", "12340008", new BigDecimal(3500.10)), new BigDecimal(100));
+        transferToDo = new Transfer(
+                new Account("123456", "12345678", createBigDecimal(5000.75)),
+                new Account("123256", "12340008", createBigDecimal(3500.10)),
+                createBigDecimal(199.95));
     }
 
     @Test
@@ -139,15 +143,15 @@ class DefaultTransfersServiceTest {
     void createTransfer_whenAccountsAreCorrect_shouldUpdateTheirNewAmountAvailable()
             throws DataManagerException, TransfersException {
         when(this.accountDAO.getAccountBySortCodeAndNumber(any(), any()))
-                .thenReturn(new Account(1, "123456", "12345678", new BigDecimal(5000.25)))
-                .thenReturn(new Account(2, "123456", "12345678", new BigDecimal(1200.00)));
+                .thenReturn(new Account(1, "123456", "12345688", createBigDecimal(5000.25)))
+                .thenReturn(new Account(2, "123456", "12345678", createBigDecimal(1200.00)));
 
         this.transfersService.create(transferToDo);
 
         verify(this.transfersDAO).saveTransfers(
-                eq(new Transfer(new Account(1, "123456", "12345678", new BigDecimal(4900.25)),
-                        new Account(2, "123456", "12345678", new BigDecimal(1300.00)),
-                        new BigDecimal(100))));
+                eq(new Transfer(new Account(1, "123456", "12345688", createBigDecimal(4800.30)),
+                        new Account(2, "123456", "12345678", createBigDecimal(1399.95)),
+                        createBigDecimal(199.95))));
     }
 
     @Test
@@ -160,5 +164,10 @@ class DefaultTransfersServiceTest {
 
         assertEquals(mockList, resultList);
         verify(this.transfersDAO).getTransfers();
+    }
+
+    private BigDecimal createBigDecimal(double number) {
+        BigDecimal newBigDecimal = new BigDecimal(number, MathContext.UNLIMITED);
+        return newBigDecimal.setScale(2, RoundingMode.HALF_EVEN);
     }
 }

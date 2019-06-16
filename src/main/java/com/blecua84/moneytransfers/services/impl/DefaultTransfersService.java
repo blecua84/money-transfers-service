@@ -132,7 +132,6 @@ public class DefaultTransfersService implements TransfersService {
     private void updateAccountsWithTheAmountOfTransfer(Transfer transfer) {
         transfer.setFrom(takeOutMoneyFromAccount(transfer.getFrom(), transfer.getAmount()));
         transfer.setTo(takeInMoneyToAccount(transfer.getTo(), transfer.getAmount()));
-
     }
 
     private Account takeOutMoneyFromAccount(Account account, BigDecimal amount) {
