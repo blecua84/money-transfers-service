@@ -21,7 +21,7 @@
         <javax.el-api.version>3.0.1-b06</javax.el-api.version>
         <javax.el.version>2.2.6</javax.el.version>
         <h2.version>1.4.199</h2.version>
-        <hibernate-core.version>5.3.7.Final</hibernate-core.version>
+        <hibernate-core.version>5.3.20.Final</hibernate-core.version>
         <byte-budy.version>1.9.13</byte-budy.version>
         <jaxb.version>2.3.0</jaxb.version>
     </properties>
